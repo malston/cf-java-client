@@ -554,6 +554,10 @@ public class CloudFoundryClient implements CloudFoundryOperations {
     	return cc.getOrgByName(orgName, required);
     }
 
+	public Long getMemoryUsageForOrg(UUID org){
+    	return cc.getMemoryUsageForOrg(org);
+    }
+
 	public List<CloudQuota> getQuotas() {
 		return cc.getQuotas();
 	}

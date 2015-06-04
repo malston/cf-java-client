@@ -743,6 +743,23 @@ public class CloudControllerClientImpl implements CloudControllerClient {
 	}
 
 	@Override
+	public Long getMemoryUsageForOrg(UUID org) {
+		String url = getUrl("/v2/organizations/{guid}/memory_usage");
+		Map<String, Object> urlVars = new HashMap();
+		urlVars.put("guid", org);
+		String resp = restTemplate.getForObject(url, String.class, urlVars);
+		Map<String, Object> respMap = JsonUtil.convertJsonToMap(resp);
+		Long memoryUsage;
+		try {
+			memoryUsage = Long.valueOf("" + respMap.get("memory_usage_in_mb"));
+		} catch (NumberFormatException e) {
+			memoryUsage = 0L;
+		}
+
+		return memoryUsage;
+	}
+
+	@Override
 	public OAuth2AccessToken login() {
 		oauthClient.init(cloudCredentials);
 		return oauthClient.getToken();

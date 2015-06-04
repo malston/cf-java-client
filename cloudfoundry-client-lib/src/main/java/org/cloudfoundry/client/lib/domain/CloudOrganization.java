@@ -23,6 +23,7 @@ public class CloudOrganization extends CloudEntity {
 
 	private boolean billingEnabled = false;
 	private CloudQuota quota;
+	private Long memoryUsage;
 
 	public CloudOrganization(Meta meta, String name) {
 		this(meta, name, false);
@@ -39,6 +40,13 @@ public class CloudOrganization extends CloudEntity {
 		this.billingEnabled = billingEnabled;
 	}
 
+	public CloudOrganization(Meta meta, String name, CloudQuota quota, boolean billingEnabled, Long memoryUsage) {
+		super(meta, name);
+		this.quota=quota;
+		this.billingEnabled = billingEnabled;
+		this.memoryUsage = memoryUsage;
+	}
+
 	public boolean isBillingEnabled() {
 		return billingEnabled;
 	}
@@ -49,5 +57,13 @@ public class CloudOrganization extends CloudEntity {
 
 	public void setQuota(CloudQuota quota) {
 		this.quota = quota;
+	}
+
+	public Long getMemoryUsage() {
+		return memoryUsage;
+	}
+
+	public void setMemoryUsage(Long memory) {
+		this.memoryUsage = memory;
 	}
 }

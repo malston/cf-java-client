@@ -219,6 +219,14 @@ public interface CloudFoundryOperations {
 	 * @return
 	 */
 	CloudOrganization getOrgByName(String orgName, boolean required);
+	
+	/**
+	 * Get the memory usage for a given org.
+	 *
+	 * @param org GUID of organization
+	 * @return
+	 */
+	Long getMemoryUsageForOrg(UUID org);
 
 	/**
 	 * Register new user account with the provided credentials.

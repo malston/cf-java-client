@@ -121,12 +121,13 @@ public class CloudEntityResourceMapper {
 
 	private CloudOrganization mapOrganizationResource(Map<String, Object> resource) {
 		Boolean billingEnabled = getEntityAttribute(resource, "billing_enabled", Boolean.class);
+		Long memory = getEntityAttribute(resource, "memory_usage", Long.class);
 		Map<String, Object> quotaDefinition = getEmbeddedResource(resource, "quota_definition");
 		CloudQuota quota = null;
 		if (quotaDefinition != null) {
 			quota = mapQuotaResource(quotaDefinition);
 		}
-		return new CloudOrganization(getMeta(resource), getNameOfResource(resource), quota, billingEnabled);
+		return new CloudOrganization(getMeta(resource), getNameOfResource(resource), quota, billingEnabled, memory);
 	}
 
 	private CloudQuota mapQuotaResource(Map<String, Object> resource) {
