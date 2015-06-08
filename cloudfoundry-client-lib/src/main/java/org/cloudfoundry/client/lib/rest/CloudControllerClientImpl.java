@@ -75,6 +75,7 @@ import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
 import org.cloudfoundry.client.lib.domain.CloudServicePlan;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudStack;
+import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.lib.domain.CrashInfo;
 import org.cloudfoundry.client.lib.domain.CrashesInfo;
 import org.cloudfoundry.client.lib.domain.InstanceState;
@@ -759,6 +760,48 @@ public class CloudControllerClientImpl implements CloudControllerClient {
 		return memoryUsage;
 	}
 
+	@Override
+	public List<CloudUser> getUserRolesForOrg(UUID org) {
+		Map<String, Object> urlVars = new HashMap<String, Object>();
+		String urlPath = "/v2/organizations/{guid}/user_roles";
+		urlVars.put("guid", org);
+		List<Map<String, Object>> resourceList = getAllResources(urlPath, urlVars);
+		List<CloudUser> users = new ArrayList<CloudUser>();
+		for (Map<String, Object> resource : resourceList) {
+			users.add(resourceMapper.mapResource(resource, CloudUser.class));
+		}
+		return users;
+	}
+	
+	@Override
+	public List<CloudUser> getUsersForOrg(UUID org) {
+		Map<String, Object> urlVars = new HashMap<String, Object>();
+		String urlPath = "/v2/users?inline-relations-depth=1";
+		urlVars.put("guid", org);
+		List<Map<String, Object>> resourceList = getAllResources(urlPath, urlVars);
+		List<CloudUser> users = new ArrayList<CloudUser>();
+		for (Map<String, Object> resource : resourceList) {
+			if (hasEmbeddedResource(resource, "managed_organizations")) {
+				fillInEmbeddedResource(resource, "managed_organizations");
+			}
+			users.add(resourceMapper.mapResource(resource, CloudUser.class));
+		}
+		return users;
+	}
+
+	@Override
+	public List<CloudUser> getOrgManagers(UUID org) {
+		Map<String, Object> urlVars = new HashMap<String, Object>();
+		String urlPath = "/v2/organizations/{guid}/managers?inline-relations-depth=1";
+		urlVars.put("guid", org);
+		List<Map<String, Object>> resourceList = getAllResources(urlPath, urlVars);
+		List<CloudUser> users = new ArrayList<CloudUser>();
+		for (Map<String, Object> resource : resourceList) {
+			users.add(resourceMapper.mapResource(resource, CloudUser.class));
+		}
+		return users;
+	}
+	
 	@Override
 	public OAuth2AccessToken login() {
 		oauthClient.init(cloudCredentials);

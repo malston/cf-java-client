@@ -16,32 +16,33 @@
 
 package org.cloudfoundry.client.lib.util;
 
-import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.CloudJob;
-import org.cloudfoundry.client.lib.domain.CloudSecurityGroup;
-import org.cloudfoundry.client.lib.domain.CloudDomain;
-import org.cloudfoundry.client.lib.domain.CloudEntity;
-import org.cloudfoundry.client.lib.domain.CloudEvent;
-import org.cloudfoundry.client.lib.domain.CloudOrganization;
-import org.cloudfoundry.client.lib.domain.CloudQuota;
-import org.cloudfoundry.client.lib.domain.CloudRoute;
-import org.cloudfoundry.client.lib.domain.CloudService;
-import org.cloudfoundry.client.lib.domain.CloudServiceBinding;
-import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
-import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
-import org.cloudfoundry.client.lib.domain.CloudServicePlan;
-import org.cloudfoundry.client.lib.domain.CloudServiceBroker;
-import org.cloudfoundry.client.lib.domain.CloudSpace;
-import org.cloudfoundry.client.lib.domain.CloudStack;
-import org.cloudfoundry.client.lib.domain.SecurityGroupRule;
-import org.cloudfoundry.client.lib.domain.Staging;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.cloudfoundry.client.lib.domain.CloudApplication;
+import org.cloudfoundry.client.lib.domain.CloudDomain;
+import org.cloudfoundry.client.lib.domain.CloudEntity;
+import org.cloudfoundry.client.lib.domain.CloudEvent;
+import org.cloudfoundry.client.lib.domain.CloudJob;
+import org.cloudfoundry.client.lib.domain.CloudOrganization;
+import org.cloudfoundry.client.lib.domain.CloudQuota;
+import org.cloudfoundry.client.lib.domain.CloudRoute;
+import org.cloudfoundry.client.lib.domain.CloudSecurityGroup;
+import org.cloudfoundry.client.lib.domain.CloudService;
+import org.cloudfoundry.client.lib.domain.CloudServiceBinding;
+import org.cloudfoundry.client.lib.domain.CloudServiceBroker;
+import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
+import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
+import org.cloudfoundry.client.lib.domain.CloudServicePlan;
+import org.cloudfoundry.client.lib.domain.CloudSpace;
+import org.cloudfoundry.client.lib.domain.CloudStack;
+import org.cloudfoundry.client.lib.domain.CloudUser;
+import org.cloudfoundry.client.lib.domain.SecurityGroupRule;
+import org.cloudfoundry.client.lib.domain.Staging;
 
 /**
  * Class handling the mapping of the cloud domain objects
@@ -64,6 +65,9 @@ public class CloudEntityResourceMapper {
 
 	@SuppressWarnings("unchecked")
 	public <T> T mapResource(Map<String, Object> resource, Class<T> targetClass) {
+		if (targetClass == CloudUser.class) {
+			return (T) mapUserResource(resource);
+		}
 		if (targetClass == CloudSpace.class) {
 			return (T) mapSpaceResource(resource);
 		}
@@ -118,7 +122,39 @@ public class CloudEntityResourceMapper {
 		}
 		return new CloudSpace(getMeta(resource), getNameOfResource(resource), organization);
 	}
+	
+	private CloudUser mapUserResource(Map<String, Object> resource) {
+		String username = getEntityAttribute(resource, "username", String.class);
+		List<Map<String, Object>> managedOrgsResource = getEmbeddedResourceList(getEntity(resource), "managed_organizations");
+		List<CloudOrganization> managedOrgs = new ArrayList<CloudOrganization>();
+		if (managedOrgsResource != null) {
+			for (Map<String, Object> managedOrg : managedOrgsResource) {
+				managedOrgs.add(mapOrganizationResource(managedOrg));
+			}
+		}
+//		List<String> orgRoles = new ArrayList<String>();
+//		List<Object> organizationRoles = getEntityAttribute(resource, "organization_roles", List.class);
+//		if (organizationRoles != null) {
+//			for (Object orgRole : organizationRoles) {
+//				if (orgRole != null) {
+//					orgRoles.add(""+ orgRole);
+//				}
+//			}
+//		}
+		return new CloudUser(getMeta(resource), getNameOfResource(resource), username, null, managedOrgs);
+	}
 
+	private CloudQuota mapOrganizationRolesResource(Map<String, Object> resource) {
+		Boolean nonBasicServicesAllowed = getEntityAttribute(resource, "non_basic_services_allowed", Boolean.class);
+		int totalServices = getEntityAttribute(resource, "total_services", Integer.class);
+		int totalRoutes = getEntityAttribute(resource, "total_routes", Integer.class);
+		long memoryLimit = getEntityAttribute(resource, "memory_limit", Long.class);
+
+		return new CloudQuota(getMeta(resource), getNameOfResource(resource),
+			nonBasicServicesAllowed, totalServices, totalRoutes,
+			memoryLimit);
+	}
+	
 	private CloudOrganization mapOrganizationResource(Map<String, Object> resource) {
 		Boolean billingEnabled = getEntityAttribute(resource, "billing_enabled", Boolean.class);
 		Long memory = getEntityAttribute(resource, "memory_usage", Long.class);

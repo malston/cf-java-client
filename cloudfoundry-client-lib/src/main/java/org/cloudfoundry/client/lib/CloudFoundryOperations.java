@@ -41,6 +41,7 @@ import org.cloudfoundry.client.lib.domain.CloudServiceInstance;
 import org.cloudfoundry.client.lib.domain.CloudServiceOffering;
 import org.cloudfoundry.client.lib.domain.CloudSpace;
 import org.cloudfoundry.client.lib.domain.CloudStack;
+import org.cloudfoundry.client.lib.domain.CloudUser;
 import org.cloudfoundry.client.lib.domain.CrashesInfo;
 import org.cloudfoundry.client.lib.domain.InstancesInfo;
 import org.cloudfoundry.client.lib.domain.Staging;
@@ -219,6 +220,14 @@ public interface CloudFoundryOperations {
 	 * @return
 	 */
 	CloudOrganization getOrgByName(String orgName, boolean required);
+
+	/**
+	 * Get the organizational manager users for a given org.
+	 *
+	 * @param org GUID of organization
+	 * @return
+	 */
+	List<CloudUser> getOrgManagers(UUID org);
 	
 	/**
 	 * Get the memory usage for a given org.
